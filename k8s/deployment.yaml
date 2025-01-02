@@ -1,0 +1,58 @@
+  apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    name: meu-worker
+    namespace: default
+    labels:
+      app: meu-worker
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        app: meu-worker
+    template:
+      metadata:
+        labels:
+          app: meu-worker
+      spec:
+        containers:
+        - name: meu-worker
+          image: meu-worker:latest
+          imagePullPolicy: Never
+          ports:
+          - containerPort: 80
+          volumeMounts:
+          - name: appsettings-final-volume
+            mountPath: /app/appsettings.json
+            subPath: appsettings.json
+          env:
+          - name: DOTNET_ENVIRONMENT
+            value: "Production"
+        initContainers:
+        - name: config-replacer
+          image: busybox
+          command:
+          - sh
+          - -c
+          - |
+            USER_ID=$(cat /secrets/USER_ID)
+            PASSWORD=$(cat /secrets/PASSWORD)
+            cp /app/appsettings.json /config/appsettings.json
+            sed -i "s/Integrated Security=True;/User ID=$USER_ID;Password=$PASSWORD;/g" /config/appsettings.json
+          volumeMounts:
+          - name: appsettings-configmap-volume
+            mountPath: /app/appsettings.json
+            subPath: appsettings.json
+          - name: secret-volume
+            mountPath: /secrets
+          - name: appsettings-final-volume
+            mountPath: /config
+        volumes:
+        - name: appsettings-configmap-volume
+          configMap:
+            name: meu-worker-config
+        - name: secret-volume
+          secret:
+            secretName: db-credentials
+        - name: appsettings-final-volume
+          emptyDir: {}
