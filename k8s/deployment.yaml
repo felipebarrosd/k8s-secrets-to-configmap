@@ -3,6 +3,8 @@
   metadata:
     name: meu-worker
     namespace: default
+    annotations:
+      reloader.stakater.com/auto: "true"
     labels:
       app: meu-worker
   spec:

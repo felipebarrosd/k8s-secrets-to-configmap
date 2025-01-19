@@ -2,6 +2,8 @@
 
 Este repositório foi criado para explorar e testar funcionalidades relacionadas ao uso de **Secrets** e **ConfigMaps** no Kubernetes. O objetivo principal é aprender e experimentar abordagens para gerenciar configurações sensíveis e não sensíveis em aplicações Kubernetes.
 
+O projeto também inclui o uso da ferramenta k8s-sidecar/reload para detectar mudanças em ConfigMaps e Secrets e reiniciar os Pods automaticamente, garantindo que as aplicações estejam sempre atualizadas.
+
 ---
 
 ## Objetivos do Projeto
@@ -9,6 +11,7 @@ Este repositório foi criado para explorar e testar funcionalidades relacionadas
 - Demonstrar como criar e usar **Secrets** e **ConfigMaps** no Kubernetes.
 - Explorar a substituição dinâmica de valores sensíveis em arquivos de configuração usando init containers.
 - Testar diferentes abordagens para gerenciar variáveis de ambiente e arquivos de configuração.
+- Garantir atualizações automáticas de configuração em Pods com a ferramenta Reload.
 
 ---
 
@@ -25,10 +28,23 @@ Este repositório foi criado para explorar e testar funcionalidades relacionadas
 - Docker
 - Imagem base: **busybox** (para init containers)
 - .NET 6
+- k8s-sidecar/reload
 
 ---
 
 ## Como Usar
+
+### Requisitos
+
+- Kubernetes Cluster
+- Ferramenta `kubectl`
+- [Reloader](https://github.com/stakater/Reloader) instalado no cluster:
+  ```bash
+  helm repo add stakater https://stakater.github.io/stakater-charts
+  helm install reloader stakater/reloader
+  ```
+
+### Deploy
 
 1. Clone o repositório:
 
@@ -44,6 +60,12 @@ Este repositório foi criado para explorar e testar funcionalidades relacionadas
    ```
 
 3. Modifique os arquivos em `k8s/` para realizar seus próprios testes.
+
+4. Teste a Ferramenta Reloader:
+   Atualize o ConfigMap ou Secret e observe os Pods sendo reiniciados automaticamente:
+   ```bash
+   kubectl edit configmap meu-worker-config
+   ```
 
 ---
 
@@ -63,5 +85,10 @@ Este repositório foi criado para explorar e testar funcionalidades relacionadas
 - Demonstra como expor valores de Secrets como variáveis de ambiente em contêineres.
 - Manifestos: `k8s/secrets.yaml` e `k8s/deployment.yaml`
 
+### Atualização automática de configmap e secrets com Reloader
+
+- A ferramenta reload monitora mudanças em ConfigMaps e Secrets. Quando detecta alterações, ela reinicia automaticamente os Pods associados. Isso garante que a aplicação sempre opere com as configurações mais recentes, sem intervenção manual.
+- Manifestos: `k8s/deployment.yaml`
+  
 ---
 
